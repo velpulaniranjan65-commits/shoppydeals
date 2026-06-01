@@ -128,12 +128,18 @@ export function ProductForm({
 
       console.log("UPLOAD SUCCESS:", url);
 
-      const updatedForm = {
-  ...form,
-  image: url,
-};
+     
+	setForm((prev) => {
+	  const updated = {
+	    ...prev,
+	    image: url,
+	  };
 
-setForm(updatedForm);
+	  console.log("UPDATED FORM:", updated);
+
+	  return updated;
+	});
+
 
 console.log("UPDATED FORM:", updatedForm);
 
