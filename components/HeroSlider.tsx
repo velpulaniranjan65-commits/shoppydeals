@@ -16,9 +16,11 @@ export function HeroSlider({ products }: HeroSliderProps) {
 
   useEffect(() => {
     if (slides.length <= 1) return;
+
     const id = setInterval(() => {
       setIndex((i) => (i + 1) % slides.length);
     }, 4500);
+
     return () => clearInterval(id);
   }, [slides.length]);
 
@@ -26,8 +28,9 @@ export function HeroSlider({ products }: HeroSliderProps) {
     return (
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-blue-700 p-8 text-white sm:p-12">
         <h1 className="text-2xl font-bold sm:text-3xl">
-      Best Online Deals
+          Best Online Deals
         </h1>
+
         <p className="mt-2 max-w-md text-blue-100">
           Amazon, Flipkart, Myntra & more — updated daily for Telugu shoppers.
         </p>
@@ -40,9 +43,14 @@ export function HeroSlider({ products }: HeroSliderProps) {
   async function handleCta() {
     try {
       const { url } = await api.trackClick(current._id);
+
       window.open(url, "_blank", "noopener,noreferrer");
     } catch {
-      window.open(current.affiliateLink, "_blank", "noopener,noreferrer");
+      window.open(
+        current.affiliateLink,
+        "_blank",
+        "noopener,noreferrer"
+      );
     }
   }
 
@@ -57,21 +65,26 @@ export function HeroSlider({ products }: HeroSliderProps) {
           transition={{ duration: 0.4 }}
           className="grid min-h-[200px] grid-cols-1 items-center gap-4 p-6 sm:min-h-[240px] sm:grid-cols-2 sm:p-8"
         >
+          {/* LEFT CONTENT */}
           <div className="relative z-10 space-y-3">
             <span className="inline-block rounded-lg bg-orange-500 px-2 py-1 text-xs font-bold">
               {current.discount}% OFF — Featured Deal
             </span>
+
             <h1 className="line-clamp-2 text-xl font-bold sm:text-2xl">
               {current.title}
             </h1>
+
             <div className="flex items-baseline gap-2">
               <span className="text-2xl font-bold">
                 {formatPrice(current.dealPrice)}
               </span>
+
               <span className="text-sm text-slate-400 line-through">
                 {formatPrice(current.originalPrice)}
               </span>
             </div>
+
             <button
               type="button"
               onClick={handleCta}
@@ -80,18 +93,22 @@ export function HeroSlider({ products }: HeroSliderProps) {
               View Deal →
             </button>
           </div>
-          <div className="relative mx-auto aspect-square w-full max-w-[180px] sm:max-w-[220px]">
+
+          {/* RIGHT IMAGE */}
+          <div className="relative mx-auto aspect-square w-full max-w-[180px] overflow-hidden rounded-xl bg-white sm:max-w-[220px]">
             <Image
               src={getImageUrl(current.image)}
               alt={current.title}
               fill
-              className="object-contain"
+              className="object-cover"
               priority
               sizes="220px"
             />
           </div>
         </motion.div>
       </AnimatePresence>
+
+      {/* DOTS */}
       {slides.length > 1 && (
         <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
           {slides.map((_, i) => (
@@ -101,7 +118,9 @@ export function HeroSlider({ products }: HeroSliderProps) {
               aria-label={`Slide ${i + 1}`}
               onClick={() => setIndex(i)}
               className={`h-1.5 rounded-full transition-all ${
-                i === index ? "w-6 bg-white" : "w-1.5 bg-white/40"
+                i === index
+                  ? "w-6 bg-white"
+                  : "w-1.5 bg-white/40"
               }`}
             />
           ))}
