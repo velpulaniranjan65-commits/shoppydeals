@@ -5,12 +5,10 @@ import { authMiddleware } from "../middleware/auth.js";
 
 const router = Router();
 
-// multer memory storage (correct for cloudinary stream)
 const upload = multer({
   storage: multer.memoryStorage(),
 });
 
-// upload route
 router.post(
   "/",
   authMiddleware,
@@ -18,24 +16,23 @@ router.post(
   async (req, res) => {
     try {
       if (!req.file) {
-        return res.status(400).json({ message: "No image uploaded" });
+        return res.status(400).json({
+          message: "No image uploaded",
+        });
       }
 
-      const file = req.file;
-
-      // Cloudinary upload stream
       const result = await new Promise<any>((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
           {
             folder: "shoppydeals",
           },
-          (error: any, result: any) => {
+          (error, result) => {
             if (error) reject(error);
             else resolve(result);
           }
         );
 
-        stream.end(file.buffer);
+        stream.end(req.file!.buffer);
       });
 
       return res.json({
@@ -44,7 +41,8 @@ router.post(
       });
 
     } catch (error) {
-      console.error("Cloudinary Upload Error:", error);
+      console.error("UPLOAD ERROR:", error);
+
       return res.status(500).json({
         message: "Upload failed",
       });
