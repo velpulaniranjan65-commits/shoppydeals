@@ -82,7 +82,7 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
       console.log("UPLOAD RESPONSE:", res);
 
       // 🔥 SAFE FIX (works for both backend formats)
-      const imageUrl = res?.imageUrl || res?.url;
+      const imageUrl =res.url;
 
       if (!imageUrl) {
         throw new Error("Upload failed - no image URL returned");
