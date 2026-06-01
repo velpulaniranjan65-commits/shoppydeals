@@ -59,6 +59,22 @@ async function fetchApi<T>(
    API METHODS
 ========================= */
 export const api = {
+  /* ---------- AUTH (🔥 IMPORTANT FIX WAS MISSING) ---------- */
+  login: (email: string, password: string) =>
+    fetchApi<{ token: string; admin: { id: string; email: string; name: string } }>(
+      "/api/auth/login",
+      {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+      }
+    ),
+
+  getMe: (token: string) =>
+    fetchApi<{ admin: { id: string; email: string; name: string } }>(
+      "/api/auth/me",
+      { token }
+    ),
+
   /* ---------- CATEGORY ---------- */
   getCategories: () =>
     fetchApi<{ categories: Category[] }>("/api/categories"),
@@ -115,11 +131,7 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
-  updateProduct: (
-    token: string,
-    id: string,
-    body: Record<string, unknown>
-  ) =>
+  updateProduct: (token: string, id: string, body: Record<string, unknown>) =>
     fetchApi<{ product: Product }>(`/api/products/${id}`, {
       method: "PUT",
       token,
@@ -133,7 +145,7 @@ export const api = {
     }),
 
   /* =========================
-     🔥 FIXED UPLOAD IMAGE (IMPORTANT)
+     🔥 IMAGE UPLOAD FIXED (FINAL)
   ========================= */
   uploadImage: async (token: string, file: File) => {
     const form = new FormData();
@@ -153,7 +165,7 @@ export const api = {
       throw new Error(data.message || "Upload failed");
     }
 
-    // 🔥 SAFE RESPONSE HANDLING
+    // 🔥 SAFE RESPONSE HANDLING (IMPORTANT)
     const url = data?.url || data?.imageUrl;
 
     if (!url) {
@@ -163,17 +175,11 @@ export const api = {
     return { url };
   },
 
-  /* ---------- OTHER ---------- */
+  /* ---------- ANALYTICS ---------- */
   trackClick: (productId: string) =>
     fetchApi<{ url: string; clicks: number }>(
       `/api/clicks/${productId}`,
       { method: "POST" }
-    ),
-
-  getMe: (token: string) =>
-    fetchApi<{ admin: { id: string; email: string; name: string } }>(
-      "/api/auth/me",
-      { token }
     ),
 
   getDashboard: (token: string) =>
