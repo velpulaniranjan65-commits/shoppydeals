@@ -128,10 +128,14 @@ export function ProductForm({
 
       console.log("UPLOAD SUCCESS:", url);
 
-      setForm((f) => ({
-        ...f,
-        image: url,
-      }));
+      const updatedForm = {
+  ...form,
+  image: url,
+};
+
+setForm(updatedForm);
+
+console.log("UPDATED FORM:", updatedForm);
 
     } catch (err) {
       console.error("UPLOAD ERROR:", err);
@@ -162,7 +166,7 @@ export function ProductForm({
 
     setError("");
     setLoading(true);
-
+    console.log("FORM STATE:", form);
     const body = {
       ...form,
       originalPrice: Number(form.originalPrice),
