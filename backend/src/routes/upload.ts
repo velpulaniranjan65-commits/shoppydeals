@@ -1,12 +1,19 @@
 import { Router } from "express";
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
-import authMiddleware from "../middleware/authMiddleware.js";
+import { authMiddleware } from "../middleware/auth.js"; // ✅ FIXED IMPORT
 
 const router = Router();
 
 const upload = multer({
   storage: multer.memoryStorage(),
+});
+
+// Cloudinary config (make sure env is set)
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
+  api_key: process.env.CLOUDINARY_API_KEY!,
+  api_secret: process.env.CLOUDINARY_API_SECRET!,
 });
 
 router.post(
@@ -15,13 +22,12 @@ router.post(
   upload.single("image"),
   async (req, res) => {
     try {
+      // ✅ FIX 1: file check
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
       }
 
-      const file = req.file;
-
-      const result = await new Promise<any>((resolve, reject) => {
+      const result: any = await new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
           {
             folder: "shoppydeals",
@@ -32,22 +38,23 @@ router.post(
           }
         );
 
-        stream.on("error", reject);
-        stream.end(file.buffer);
+        stream.end(req.file!.buffer);
       });
+
+      // ✅ FIX 2: safe URL handling
+      const url = result?.secure_url || result?.url;
+
+      if (!url) {
+        return res.status(500).json({ message: "Upload failed" });
+      }
 
       return res.json({
-        url: result.secure_url,
-        imageUrl: result.secure_url,
-        public_id: result.public_id,
+        url, // ✅ frontend expects this
       });
-
-    } catch (error: any) {
-      console.error("UPLOAD ERROR:", error);
-
+    } catch (err: any) {
+      console.error("UPLOAD ERROR:", err);
       return res.status(500).json({
-        message: "Upload failed",
-        error: error?.message || String(error),
+        message: err.message || "Upload failed",
       });
     }
   }
