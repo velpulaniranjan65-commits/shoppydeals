@@ -1,3 +1,4 @@
+tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -12,13 +13,15 @@ interface ProductFormProps {
   onSuccess: () => void;
 }
 
-export function ProductForm({ product, onSuccess }: ProductFormProps) {
-  console.log("PRODUCT:", product);
-  console.log("IMAGE:", product?.image);
+export function ProductForm({
+  product,
+  onSuccess,
+}: ProductFormProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
-  const [uploading, setUploading] = useState(false); // ✅ NEW
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+
   const [imagePreview, setImagePreview] = useState(
     product?.image ? getImageUrl(product.image) : ""
   );
@@ -40,25 +43,44 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
   });
 
   useEffect(() => {
-    api.getCategories().then((r) => setCategories(r.categories));
+    api.getCategories().then((r) =>
+      setCategories(r.categories)
+    );
   }, []);
 
   useEffect(() => {
-    setImagePreview(product?.image ? getImageUrl(product.image) : "");
+    setImagePreview(
+      product?.image ? getImageUrl(product.image) : ""
+    );
   }, [product]);
 
-  function updateField(key: string, value: string | boolean) {
+  function updateField(
+    key: string,
+    value: string | boolean
+  ) {
     setForm((f) => {
       const next = { ...f, [key]: value };
 
-      if (key === "originalPrice" || key === "dealPrice") {
+      if (
+        key === "originalPrice" ||
+        key === "dealPrice"
+      ) {
         const orig = Number(
-          key === "originalPrice" ? value : f.originalPrice
+          key === "originalPrice"
+            ? value
+            : f.originalPrice
         );
-        const deal = Number(key === "dealPrice" ? value : f.dealPrice);
+
+        const deal = Number(
+          key === "dealPrice"
+            ? value
+            : f.dealPrice
+        );
 
         if (orig > 0 && deal >= 0) {
-          next.discount = String(Math.round(((orig - deal) / orig) * 100));
+          next.discount = String(
+            Math.round(((orig - deal) / orig) * 100)
+          );
         }
       }
 
@@ -66,37 +88,52 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
     });
   }
 
-  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleImageUpload(
+    e: React.ChangeEvent<HTMLInputElement>
+  ) {
     const file = e.target.files?.[0];
+
     if (!file) return;
 
     const token = getToken();
+
     if (!token) return;
 
     const localPreview = URL.createObjectURL(file);
+
     setImagePreview(localPreview);
 
     setUploading(true);
     setError("");
 
     try {
-      const { url } = await api.uploadImage(token, file);
-      console.log("UPLOAD URL:", url);
+      const { url } = await api.uploadImage(
+        token,
+        file
+      );
+
       setForm((f) => ({
         ...f,
         image: url,
       }));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Upload failed");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Upload failed"
+      );
     } finally {
       setUploading(false);
     }
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(
+    e: React.FormEvent
+  ) {
     e.preventDefault();
 
     const token = getToken();
+
     if (!token) return;
 
     setError("");
@@ -111,21 +148,32 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
 
     try {
       if (product) {
-        await api.updateProduct(token, product._id, body);
+        await api.updateProduct(
+          token,
+          product._id,
+          body
+        );
       } else {
         await api.createProduct(token, body);
       }
 
       onSuccess();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Save failed");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Save failed"
+      );
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mx-auto max-w-2xl space-y-4">
+    <form
+      onSubmit={handleSubmit}
+      className="mx-auto max-w-2xl space-y-4"
+    >
       {error && (
         <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
           {error}
@@ -134,20 +182,180 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
 
       <div className="grid gap-4 sm:grid-cols-2">
 
-        {/* TITLE */}
+        {/* PRODUCT NAME */}
         <div className="sm:col-span-2">
-          <label className="mb-1 block text-sm font-medium">Product Name</label>
+          <label className="mb-1 block text-sm font-medium">
+            Product Name
+          </label>
+
           <input
             required
             value={form.title}
-            onChange={(e) => updateField("title", e.target.value)}
-            className="w-full rounded-lg border px-3 py-2 text-sm"
+            onChange={(e) =>
+              updateField("title", e.target.value)
+            }
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+
+        {/* DESCRIPTION */}
+        <div className="sm:col-span-2">
+          <label className="mb-1 block text-sm font-medium">
+            Description
+          </label>
+
+          <textarea
+            rows={4}
+            value={form.description}
+            onChange={(e) =>
+              updateField(
+                "description",
+                e.target.value
+              )
+            }
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+
+        {/* ORIGINAL PRICE */}
+        <div>
+          <label className="mb-1 block text-sm font-medium">
+            Original Price
+          </label>
+
+          <input
+            type="number"
+            required
+            min={0}
+            value={form.originalPrice}
+            onChange={(e) =>
+              updateField(
+                "originalPrice",
+                e.target.value
+              )
+            }
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+
+        {/* DEAL PRICE */}
+        <div>
+          <label className="mb-1 block text-sm font-medium">
+            Deal Price
+          </label>
+
+          <input
+            type="number"
+            required
+            min={0}
+            value={form.dealPrice}
+            onChange={(e) =>
+              updateField(
+                "dealPrice",
+                e.target.value
+              )
+            }
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+
+        {/* DISCOUNT */}
+        <div>
+          <label className="mb-1 block text-sm font-medium">
+            Discount %
+          </label>
+
+          <input
+            type="number"
+            value={form.discount}
+            onChange={(e) =>
+              updateField(
+                "discount",
+                e.target.value
+              )
+            }
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+
+        {/* STORE */}
+        <div>
+          <label className="mb-1 block text-sm font-medium">
+            Store
+          </label>
+
+          <select
+            value={form.store}
+            onChange={(e) =>
+              updateField("store", e.target.value)
+            }
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          >
+            {STORES.map((store) => (
+              <option key={store} value={store}>
+                {store}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* CATEGORY */}
+        <div className="sm:col-span-2">
+          <label className="mb-1 block text-sm font-medium">
+            Category
+          </label>
+
+          <select
+            required
+            value={form.category}
+            onChange={(e) =>
+              updateField(
+                "category",
+                e.target.value
+              )
+            }
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          >
+            <option value="">
+              Select category
+            </option>
+
+            {categories.map((category) => (
+              <option
+                key={category._id}
+                value={category._id}
+              >
+                {category.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* AFFILIATE LINK */}
+        <div className="sm:col-span-2">
+          <label className="mb-1 block text-sm font-medium">
+            Affiliate URL
+          </label>
+
+          <input
+            type="url"
+            required
+            value={form.affiliateLink}
+            onChange={(e) =>
+              updateField(
+                "affiliateLink",
+                e.target.value
+              )
+            }
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
           />
         </div>
 
         {/* IMAGE */}
         <div className="sm:col-span-2">
-          <label className="mb-1 block text-sm font-medium">Product Image</label>
+          <label className="mb-1 block text-sm font-medium">
+            Product Image
+          </label>
 
           <input
             type="file"
@@ -157,7 +365,9 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
           />
 
           {uploading && (
-            <p className="text-xs text-blue-600 mt-1">Uploading...</p>
+            <p className="mt-1 text-xs text-blue-600">
+              Uploading...
+            </p>
           )}
 
           {imagePreview && (
@@ -173,19 +383,48 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
           )}
 
           {!form.image && (
-            <p className="mt-1 text-xs text-red-600">Image required</p>
+            <p className="mt-1 text-xs text-red-600">
+              Image required
+            </p>
           )}
         </div>
 
+        {/* FEATURED */}
+        <div className="sm:col-span-2">
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={form.featured}
+              onChange={(e) =>
+                updateField(
+                  "featured",
+                  e.target.checked
+                )
+              }
+            />
+
+            Featured Product
+          </label>
+        </div>
       </div>
 
       <button
         type="submit"
-        disabled={loading || uploading || !form.image}
+        disabled={
+          loading ||
+          uploading ||
+          !form.image
+        }
         className="rounded-xl bg-primary px-6 py-2.5 text-white disabled:opacity-60"
       >
-        {loading ? "Saving..." : product ? "Update Product" : "Add Product"}
+        {loading
+          ? "Saving..."
+          : product
+          ? "Update Product"
+          : "Add Product"}
       </button>
     </form>
   );
 }
+
+
