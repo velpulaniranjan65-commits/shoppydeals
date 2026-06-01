@@ -1,4 +1,5 @@
 import { api } from "@/lib/api";
+
 import { HeroSlider } from "@/components/HeroSlider";
 import { CategoryChips } from "@/components/CategoryChips";
 import { SectionTitle } from "@/components/SectionTitle";

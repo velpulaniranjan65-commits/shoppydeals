@@ -16,18 +16,30 @@ export function authMiddleware(
   res: Response,
   next: NextFunction
 ): void {
-  const header = req.headers.authorization;
-  if (!header?.startsWith("Bearer ")) {
-    res.status(401).json({ message: "Unauthorized" });
-    return;
-  }
-
-  const token = header.slice(7);
   try {
+    const header = req.headers.authorization;
+
+    if (!header || !header.startsWith("Bearer ")) {
+      res.status(401).json({ message: "Unauthorized - No token" });
+      return;
+    }
+
+    const token = header.split(" ")[1];
+
+    if (!token) {
+      res.status(401).json({ message: "Unauthorized - Invalid token format" });
+      return;
+    }
+
     const payload = jwt.verify(token, env.jwtSecret) as AuthPayload;
+
     req.admin = payload;
     next();
-  } catch {
-    res.status(401).json({ message: "Invalid or expired token" });
+  } catch (error) {
+    console.error("AUTH ERROR:", error);
+
+    res.status(401).json({
+      message: "Invalid or expired token",
+    });
   }
 }

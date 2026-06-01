@@ -10,6 +10,7 @@ const upload = multer({
   storage: multer.memoryStorage(),
 });
 
+// IMAGE UPLOAD ROUTE
 router.post(
   "/",
   authMiddleware,
@@ -18,32 +19,31 @@ router.post(
     try {
       if (!req.file) {
         return res.status(400).json({
+          success: false,
           message: "No image uploaded",
         });
       }
 
-      const result = await new Promise<any>((resolve, reject) => {
+      // upload to cloudinary using stream
+      const result: any = await new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
           {
             folder: "shoppydeals",
           },
           (error, result) => {
-            if (error) {
-              return reject(error);
-            }
+            if (error) return reject(error);
             resolve(result);
           }
         );
 
-        // important: stream error safety
         stream.on("error", reject);
-
-        // send file buffer to cloudinary
         stream.end(req.file.buffer);
       });
 
-      return res.json({
-        url: result.secure_url,
+      // ✅ IMPORTANT: send correct field names
+      return res.status(200).json({
+        success: true,
+        imageUrl: result.secure_url,   // 👈 FIXED (frontend expects this)
         public_id: result.public_id,
       });
 
@@ -51,8 +51,9 @@ router.post(
       console.error("UPLOAD ERROR:", error);
 
       return res.status(500).json({
+        success: false,
         message: "Upload failed",
-        error: error?.message || String(error),
+        error: error?.message || "Unknown error",
       });
     }
   }
