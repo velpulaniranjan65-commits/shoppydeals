@@ -138,10 +138,7 @@ export function ProductForm({
 	  console.log("UPDATED FORM:", updated);
 
 	  return updated;
-	});
-
-
-console.log("UPDATED FORM:", updatedForm);
+	}
 
     } catch (err) {
       console.error("UPLOAD ERROR:", err);
