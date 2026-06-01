@@ -91,13 +91,25 @@ export function ProductForm({
   async function handleImageUpload(
     e: React.ChangeEvent<HTMLInputElement>
   ) {
+    console.log("IMAGE FUNCTION STARTED");
+
     const file = e.target.files?.[0];
 
-    if (!file) return;
+    if (!file) {
+      console.log("NO FILE SELECTED");
+      return;
+    }
+
+    console.log("FILE:", file);
 
     const token = getToken();
 
-    if (!token) return;
+    console.log("TOKEN:", token);
+
+    if (!token) {
+      setError("No token found");
+      return;
+    }
 
     const localPreview = URL.createObjectURL(file);
 
@@ -107,16 +119,23 @@ export function ProductForm({
     setError("");
 
     try {
+      console.log("UPLOADING IMAGE...");
+
       const { url } = await api.uploadImage(
         token,
         file
       );
 
+      console.log("UPLOAD SUCCESS:", url);
+
       setForm((f) => ({
         ...f,
         image: url,
       }));
+
     } catch (err) {
+      console.error("UPLOAD ERROR:", err);
+
       setError(
         err instanceof Error
           ? err.message
@@ -132,9 +151,14 @@ export function ProductForm({
   ) {
     e.preventDefault();
 
+    console.log("SUBMIT STARTED");
+
     const token = getToken();
 
-    if (!token) return;
+    if (!token) {
+      setError("No token found");
+      return;
+    }
 
     setError("");
     setLoading(true);
@@ -145,6 +169,8 @@ export function ProductForm({
       dealPrice: Number(form.dealPrice),
       discount: Number(form.discount),
     };
+
+    console.log("BODY:", body);
 
     try {
       if (product) {
@@ -157,8 +183,13 @@ export function ProductForm({
         await api.createProduct(token, body);
       }
 
+      console.log("PRODUCT SAVED");
+
       onSuccess();
+
     } catch (err) {
+      console.error("SAVE ERROR:", err);
+
       setError(
         err instanceof Error
           ? err.message
@@ -182,7 +213,6 @@ export function ProductForm({
 
       <div className="grid gap-4 sm:grid-cols-2">
 
-        {/* PRODUCT NAME */}
         <div className="sm:col-span-2">
           <label className="mb-1 block text-sm font-medium">
             Product Name
@@ -198,7 +228,6 @@ export function ProductForm({
           />
         </div>
 
-        {/* DESCRIPTION */}
         <div className="sm:col-span-2">
           <label className="mb-1 block text-sm font-medium">
             Description
@@ -217,7 +246,6 @@ export function ProductForm({
           />
         </div>
 
-        {/* ORIGINAL PRICE */}
         <div>
           <label className="mb-1 block text-sm font-medium">
             Original Price
@@ -226,7 +254,6 @@ export function ProductForm({
           <input
             type="number"
             required
-            min={0}
             value={form.originalPrice}
             onChange={(e) =>
               updateField(
@@ -238,7 +265,6 @@ export function ProductForm({
           />
         </div>
 
-        {/* DEAL PRICE */}
         <div>
           <label className="mb-1 block text-sm font-medium">
             Deal Price
@@ -247,7 +273,6 @@ export function ProductForm({
           <input
             type="number"
             required
-            min={0}
             value={form.dealPrice}
             onChange={(e) =>
               updateField(
@@ -259,7 +284,6 @@ export function ProductForm({
           />
         </div>
 
-        {/* DISCOUNT */}
         <div>
           <label className="mb-1 block text-sm font-medium">
             Discount %
@@ -278,7 +302,6 @@ export function ProductForm({
           />
         </div>
 
-        {/* STORE */}
         <div>
           <label className="mb-1 block text-sm font-medium">
             Store
@@ -299,7 +322,6 @@ export function ProductForm({
           </select>
         </div>
 
-        {/* CATEGORY */}
         <div className="sm:col-span-2">
           <label className="mb-1 block text-sm font-medium">
             Category
@@ -331,7 +353,6 @@ export function ProductForm({
           </select>
         </div>
 
-        {/* AFFILIATE LINK */}
         <div className="sm:col-span-2">
           <label className="mb-1 block text-sm font-medium">
             Affiliate URL
@@ -351,7 +372,6 @@ export function ProductForm({
           />
         </div>
 
-        {/* IMAGE */}
         <div className="sm:col-span-2">
           <label className="mb-1 block text-sm font-medium">
             Product Image
@@ -389,7 +409,6 @@ export function ProductForm({
           )}
         </div>
 
-        {/* FEATURED */}
         <div className="sm:col-span-2">
           <label className="flex items-center gap-2">
             <input
@@ -410,11 +429,7 @@ export function ProductForm({
 
       <button
         type="submit"
-        disabled={
-          loading ||
-          uploading ||
-          !form.image
-        }
+        disabled={loading}
         className="rounded-xl bg-primary px-6 py-2.5 text-white disabled:opacity-60"
       >
         {loading
