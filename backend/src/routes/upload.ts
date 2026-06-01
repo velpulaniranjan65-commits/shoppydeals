@@ -1,39 +1,56 @@
 import { Router } from "express";
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
-import authMiddleware from "../middleware/authMiddleware";
+import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = Router();
 
-const upload = multer({ storage: multer.memoryStorage() });
-
-router.post("/upload", authMiddleware, upload.single("image"), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ message: "No file uploaded" });
-    }
-
-    const result = await new Promise((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-        { folder: "shoppydeals" },
-        (err, result) => {
-          if (err) return reject(err);
-          resolve(result);
-        }
-      );
-
-      stream.end(req.file.buffer);
-    });
-
-    return res.json({
-      imageUrl: result.secure_url,   // 🔥 IMPORTANT
-      public_id: result.public_id
-    });
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Upload failed" });
-  }
+const upload = multer({
+  storage: multer.memoryStorage(),
 });
+
+router.post(
+  "/",
+  authMiddleware,
+  upload.single("image"),
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const file = req.file;
+
+      const result = await new Promise<any>((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            folder: "shoppydeals",
+          },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+          }
+        );
+
+        stream.on("error", reject);
+        stream.end(file.buffer);
+      });
+
+      return res.json({
+        url: result.secure_url,
+        imageUrl: result.secure_url,
+        public_id: result.public_id,
+      });
+
+    } catch (error: any) {
+      console.error("UPLOAD ERROR:", error);
+
+      return res.status(500).json({
+        message: "Upload failed",
+        error: error?.message || String(error),
+      });
+    }
+  }
+);
 
 export default router;
