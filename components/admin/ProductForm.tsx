@@ -81,7 +81,7 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
 
     try {
       const { url } = await api.uploadImage(token, file);
-
+      console.log("UPLOAD URL:", url);
       setForm((f) => ({
         ...f,
         image: url,
