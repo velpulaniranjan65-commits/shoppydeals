@@ -1,10 +1,11 @@
 import { Router } from "express";
 import multer from "multer";
-import cloudinary from "../config/cloudinary.js";
-import { authMiddleware } from "../middleware/auth.js";
+import { v2 as cloudinary } from "cloudinary";
+import authMiddleware from "../middleware/authMiddleware";
 
 const router = Router();
 
+// multer memory storage
 const upload = multer({
   storage: multer.memoryStorage(),
 });
@@ -27,12 +28,18 @@ router.post(
             folder: "shoppydeals",
           },
           (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
+            if (error) {
+              return reject(error);
+            }
+            resolve(result);
           }
         );
 
-        stream.end(req.file!.buffer);
+        // important: stream error safety
+        stream.on("error", reject);
+
+        // send file buffer to cloudinary
+        stream.end(req.file.buffer);
       });
 
       return res.json({
@@ -40,11 +47,12 @@ router.post(
         public_id: result.public_id,
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("UPLOAD ERROR:", error);
 
       return res.status(500).json({
         message: "Upload failed",
+        error: error?.message || String(error),
       });
     }
   }
