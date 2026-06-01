@@ -46,7 +46,6 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
     setForm((prev) => {
       const next = { ...prev, [key]: value };
 
-      // AUTO DISCOUNT CALC
       if (key === "originalPrice" || key === "dealPrice") {
         const orig = Number(
           key === "originalPrice" ? value : prev.originalPrice
@@ -66,7 +65,9 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
     });
   }
 
-  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleImageUpload(
+    e: React.ChangeEvent<HTMLInputElement>
+  ) {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -148,7 +149,6 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
         </p>
       )}
 
-      {/* TITLE */}
       <input
         placeholder="Product Name"
         value={form.title}
@@ -156,7 +156,6 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
         className="w-full border p-2"
       />
 
-      {/* DESCRIPTION */}
       <textarea
         placeholder="Description"
         value={form.description}
@@ -164,7 +163,6 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
         className="w-full border p-2"
       />
 
-      {/* PRICES */}
       <input
         type="number"
         placeholder="Original Price"
@@ -181,7 +179,6 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
         className="w-full border p-2"
       />
 
-      {/* DISCOUNT */}
       <input
         type="number"
         placeholder="Discount"
@@ -190,7 +187,6 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
         className="w-full border p-2"
       />
 
-      {/* STORE */}
       <select
         value={form.store}
         onChange={(e) => updateField("store", e.target.value)}
@@ -201,7 +197,6 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
         ))}
       </select>
 
-      {/* CATEGORY */}
       <select
         value={form.category}
         onChange={(e) => updateField("category", e.target.value)}
@@ -215,7 +210,6 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
         ))}
       </select>
 
-      {/* AFFILIATE */}
       <input
         placeholder="Affiliate Link"
         value={form.affiliateLink}
@@ -223,22 +217,22 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
         className="w-full border p-2"
       />
 
-      {/* IMAGE UPLOAD */}
       <input type="file" accept="image/*" onChange={handleImageUpload} />
 
       {uploading && <p>Uploading...</p>}
 
-      {/* PREVIEW */}
+      {/* 🔥 FIXED IMAGE PREVIEW */}
       {imagePreview && (
-        <Image
-          src={imagePreview}
-          alt="preview"
-          width={120}
-          height={120}
-        />
+        <div className="relative w-[120px] h-[120px] overflow-hidden rounded-lg border bg-white">
+          <Image
+            src={imagePreview}
+            alt="preview"
+            fill
+            className="object-cover"
+          />
+        </div>
       )}
 
-      {/* FEATURED */}
       <label className="flex gap-2 items-center">
         <input
           type="checkbox"
@@ -248,7 +242,6 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
         Featured Product
       </label>
 
-      {/* SUBMIT */}
       <button
         disabled={loading}
         className="bg-black text-white px-4 py-2"
