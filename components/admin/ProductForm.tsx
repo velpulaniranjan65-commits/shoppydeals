@@ -117,42 +117,41 @@ export function ProductForm({
 
     setUploading(true);
     setError("");
+	try {
+	  console.log("UPLOADING IMAGE...");
 
-    try {
-      console.log("UPLOADING IMAGE...");
+	  const { url } = await api.uploadImage(
+	    token,
+	    file
+	  );
 
-      const { url } = await api.uploadImage(
-        token,
-        file
-      );
+	  console.log("UPLOAD SUCCESS:", url);
 
-      console.log("UPLOAD SUCCESS:", url);
+	  setForm((prev) => {
+	    const updated = {
+	      ...prev,
+	      image: url,
+	    };
 
-     
-	setForm((prev) => {
-	  const updated = {
-	    ...prev,
-	    image: url,
-	  };
+	    console.log("UPDATED FORM:", updated);
 
-	  console.log("UPDATED FORM:", updated);
+	    return updated;
+	  });
 
-	  return updated;
+	} catch (err) {
+	  console.error("UPLOAD ERROR:", err);
+
+	  setError(
+	    err instanceof Error
+	      ? err.message
+	      : "Upload failed"
+	  );
+	} finally {
+	  setUploading(false);
 	}
 
-    } catch (err) {
-      console.error("UPLOAD ERROR:", err);
 
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Upload failed"
-      );
-    } finally {
-      setUploading(false);
-    }
-  }
-
+    
   async function handleSubmit(
     e: React.FormEvent
   ) {
