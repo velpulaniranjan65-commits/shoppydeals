@@ -42,16 +42,23 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
     api.getCategories().then((r) => setCategories(r.categories));
   }, []);
 
-  function updateField(key: string, value: string | boolean) {
-    setForm((f) => {
-      const next = { ...f, [key]: value };
+  function updateField(key: string, value: any) {
+    setForm((prev) => {
+      const next = { ...prev, [key]: value };
 
+      // AUTO DISCOUNT CALC
       if (key === "originalPrice" || key === "dealPrice") {
-        const orig = Number(key === "originalPrice" ? value : f.originalPrice);
-        const deal = Number(key === "dealPrice" ? value : f.dealPrice);
+        const orig = Number(
+          key === "originalPrice" ? value : prev.originalPrice
+        );
+        const deal = Number(
+          key === "dealPrice" ? value : prev.dealPrice
+        );
 
         if (orig > 0 && deal >= 0) {
-          next.discount = String(Math.round(((orig - deal) / orig) * 100));
+          next.discount = String(
+            Math.round(((orig - deal) / orig) * 100)
+          );
         }
       }
 
@@ -59,7 +66,6 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
     });
   }
 
-  // 🔥 FIXED IMAGE UPLOAD
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -73,64 +79,52 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
     setUploading(true);
     setError("");
 
-    const preview = URL.createObjectURL(file);
-    setImagePreview(preview);
-
     try {
+      const localPreview = URL.createObjectURL(file);
+      setImagePreview(localPreview);
+
       const res = await api.uploadImage(token, file);
 
-      console.log("UPLOAD RESPONSE:", res);
+      const url = res?.url;
 
-      // 🔥 SAFE FIX (works for both backend formats)
-      const imageUrl =res.url;
-
-      if (!imageUrl) {
-        throw new Error("Upload failed - no image URL returned");
-      }
+      if (!url) throw new Error("Upload failed");
 
       setForm((prev) => ({
         ...prev,
-        image: imageUrl,
+        image: url,
       }));
-
     } catch (err) {
-      console.error("UPLOAD ERROR:", err);
       setError(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setUploading(false);
     }
   }
 
-  // 🔥 FIXED SUBMIT
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
     const token = getToken();
-
     if (!token) {
       setError("No token found");
       return;
     }
 
     if (!form.image) {
-      setError("Please upload image first");
+      setError("Please upload image");
       return;
     }
 
     setLoading(true);
     setError("");
 
+    const body = {
+      ...form,
+      originalPrice: Number(form.originalPrice),
+      dealPrice: Number(form.dealPrice),
+      discount: Number(form.discount),
+    };
+
     try {
-      const body = {
-        ...form,
-        originalPrice: Number(form.originalPrice),
-        dealPrice: Number(form.dealPrice),
-        discount: Number(form.discount),
-        image: form.image,
-      };
-
-      console.log("BODY:", body);
-
       if (product) {
         await api.updateProduct(token, product._id, body);
       } else {
@@ -138,9 +132,7 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
       }
 
       onSuccess();
-
     } catch (err) {
-      console.error("SAVE ERROR:", err);
       setError(err instanceof Error ? err.message : "Save failed");
     } finally {
       setLoading(false);
@@ -151,45 +143,118 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
     <form onSubmit={handleSubmit} className="mx-auto max-w-2xl space-y-4">
 
       {error && (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p className="rounded bg-red-100 p-2 text-sm text-red-600">
           {error}
         </p>
       )}
 
-      {/* IMAGE */}
-      <div className="sm:col-span-2">
-        <label>Product Image</label>
+      {/* TITLE */}
+      <input
+        placeholder="Product Name"
+        value={form.title}
+        onChange={(e) => updateField("title", e.target.value)}
+        className="w-full border p-2"
+      />
 
-        <input type="file" accept="image/*" onChange={handleImageUpload} />
+      {/* DESCRIPTION */}
+      <textarea
+        placeholder="Description"
+        value={form.description}
+        onChange={(e) => updateField("description", e.target.value)}
+        className="w-full border p-2"
+      />
 
-        {uploading && <p className="text-blue-600">Uploading...</p>}
+      {/* PRICES */}
+      <input
+        type="number"
+        placeholder="Original Price"
+        value={form.originalPrice}
+        onChange={(e) => updateField("originalPrice", e.target.value)}
+        className="w-full border p-2"
+      />
 
-        {imagePreview && (
-          <div className="mt-2 h-32 w-32">
-            <Image
-              src={imagePreview}
-              alt="preview"
-              width={120}
-              height={120}
-              unoptimized
-            />
-          </div>
-        )}
+      <input
+        type="number"
+        placeholder="Deal Price"
+        value={form.dealPrice}
+        onChange={(e) => updateField("dealPrice", e.target.value)}
+        className="w-full border p-2"
+      />
 
-        {!form.image && (
-          <p className="text-xs text-red-500">Image required</p>
-        )}
-      </div>
+      {/* DISCOUNT */}
+      <input
+        type="number"
+        placeholder="Discount"
+        value={form.discount}
+        onChange={(e) => updateField("discount", e.target.value)}
+        className="w-full border p-2"
+      />
 
-      {/* BUTTON */}
-      <button
-        type="submit"
-        disabled={loading}
-        className="rounded-xl bg-primary px-6 py-2 text-white disabled:opacity-60"
+      {/* STORE */}
+      <select
+        value={form.store}
+        onChange={(e) => updateField("store", e.target.value)}
+        className="w-full border p-2"
       >
-        {loading ? "Saving..." : product ? "Update Product" : "Add Product"}
-      </button>
+        {STORES.map((s) => (
+          <option key={s}>{s}</option>
+        ))}
+      </select>
 
+      {/* CATEGORY */}
+      <select
+        value={form.category}
+        onChange={(e) => updateField("category", e.target.value)}
+        className="w-full border p-2"
+      >
+        <option value="">Select Category</option>
+        {categories.map((c) => (
+          <option key={c._id} value={c._id}>
+            {c.name}
+          </option>
+        ))}
+      </select>
+
+      {/* AFFILIATE */}
+      <input
+        placeholder="Affiliate Link"
+        value={form.affiliateLink}
+        onChange={(e) => updateField("affiliateLink", e.target.value)}
+        className="w-full border p-2"
+      />
+
+      {/* IMAGE UPLOAD */}
+      <input type="file" accept="image/*" onChange={handleImageUpload} />
+
+      {uploading && <p>Uploading...</p>}
+
+      {/* PREVIEW */}
+      {imagePreview && (
+        <Image
+          src={imagePreview}
+          alt="preview"
+          width={120}
+          height={120}
+        />
+      )}
+
+      {/* FEATURED */}
+      <label className="flex gap-2 items-center">
+        <input
+          type="checkbox"
+          checked={form.featured}
+          onChange={(e) => updateField("featured", e.target.checked)}
+        />
+        Featured Product
+      </label>
+
+      {/* SUBMIT */}
+      <button
+        disabled={loading}
+        className="bg-black text-white px-4 py-2"
+      >
+        {loading ? "Saving..." : "Save Product"}
+      </button>
     </form>
   );
 }
