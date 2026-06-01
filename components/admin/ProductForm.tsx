@@ -149,7 +149,7 @@ export function ProductForm({
 	} finally {
 	  setUploading(false);
 	}
-
+       }
 
     
   async function handleSubmit(
