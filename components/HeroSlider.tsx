@@ -27,15 +27,16 @@ export function HeroSlider({ products }: HeroSliderProps) {
 
   if (!slides.length) {
     return (
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-blue-700 p-8 text-white sm:p-12">
-        <h1 className="text-2xl font-bold sm:text-3xl">
-          Best Online Deals
-        </h1>
-
-        <p className="mt-2 max-w-md text-blue-100">
-          Amazon, Flipkart, Myntra & more — updated daily for Telugu shoppers.
-        </p>
-      </div>
+     <div className="relative mx-auto h-[220px] w-[220px] overflow-hidden rounded-xl bg-white flex items-center justify-center">
+  <Image
+    src={getImageUrl(current.image)}
+    alt={current.title}
+    width={220}
+    height={220}
+    className="h-full w-full object-cover"
+    priority
+  />
+</div>
     );
   }
 
