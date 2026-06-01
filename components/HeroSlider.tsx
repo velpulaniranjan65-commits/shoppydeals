@@ -12,6 +12,7 @@ interface HeroSliderProps {
 
 export function HeroSlider({ products }: HeroSliderProps) {
   const [index, setIndex] = useState(0);
+
   const slides = products.slice(0, 5);
 
   useEffect(() => {
@@ -95,14 +96,14 @@ export function HeroSlider({ products }: HeroSliderProps) {
           </div>
 
           {/* RIGHT IMAGE */}
-          <div className="relative mx-auto aspect-square w-full max-w-[180px] overflow-hidden rounded-xl bg-white sm:max-w-[220px]">
+          <div className="relative mx-auto h-[220px] w-[220px] overflow-hidden rounded-2xl bg-white">
             <Image
               src={getImageUrl(current.image)}
               alt={current.title}
               fill
-              className="object-cover"
               priority
               sizes="220px"
+              className="object-fill"
             />
           </div>
         </motion.div>
