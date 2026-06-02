@@ -8,7 +8,7 @@
     "dev": "next dev",
     "dev:api": "npm run dev --prefix backend",
     "dev:all": "npm run dev & npm run dev:api",
-    "build": "next build",
+    "build": "next build --webpack",
     "build:api": "npm run build --prefix backend",
     "start": "next start",
     "start:api": "npm run start --prefix backend",
