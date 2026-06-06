@@ -5,17 +5,22 @@
   "private": true,
   "main": "index.js",
   "scripts": {
+    "build": "next build",
     "dev": "next dev",
     "dev:api": "npm run dev --prefix backend",
     "dev:all": "npm run dev & npm run dev:api",
-    "build": "next build",
     "build:api": "npm run build --prefix backend",
     "start": "next start",
     "start:api": "npm run start --prefix backend",
     "lint": "eslint",
-    "seed": "npm run seed --prefix backend"
+    "seed": "npm run seed --prefix backend",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
   "dependencies": {
+    "@opennextjs/cloudflare": "^1.19.11",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.10.0",
     "cookie-parser": "^1.4.7",
@@ -49,6 +54,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.98.0"
   }
 }
