@@ -6,7 +6,7 @@ const apiUrl =
   "http://localhost:5000";
 
 const nextConfig: NextConfig = {
-  turbopack: {},
+  
 
   images: {
     remotePatterns: [
