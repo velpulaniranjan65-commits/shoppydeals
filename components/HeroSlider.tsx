@@ -25,19 +25,9 @@ export function HeroSlider({ products }: HeroSliderProps) {
     return () => clearInterval(id);
   }, [slides.length]);
 
+  // FIX
   if (!slides.length) {
-    return (
-     <div className="relative mx-auto h-[220px] w-[220px] overflow-hidden rounded-xl bg-white flex items-center justify-center">
-  <Image
-    src={getImageUrl(current.image)}
-    alt={current.title}
-    width={220}
-    height={220}
-    className="h-full w-full object-cover"
-    priority
-  />
-</div>
-    );
+    return null;
   }
 
   const current = slides[index];
@@ -67,7 +57,6 @@ export function HeroSlider({ products }: HeroSliderProps) {
           transition={{ duration: 0.4 }}
           className="grid min-h-[200px] grid-cols-1 items-center gap-4 p-6 sm:min-h-[240px] sm:grid-cols-2 sm:p-8"
         >
-          {/* LEFT CONTENT */}
           <div className="relative z-10 space-y-3">
             <span className="inline-block rounded-lg bg-orange-500 px-2 py-1 text-xs font-bold">
               {current.discount}% OFF — Featured Deal
@@ -96,7 +85,6 @@ export function HeroSlider({ products }: HeroSliderProps) {
             </button>
           </div>
 
-          {/* RIGHT IMAGE */}
           <div className="relative mx-auto h-[220px] w-[220px] overflow-hidden rounded-2xl bg-white">
             <Image
               src={getImageUrl(current.image)}
@@ -110,7 +98,6 @@ export function HeroSlider({ products }: HeroSliderProps) {
         </motion.div>
       </AnimatePresence>
 
-      {/* DOTS */}
       {slides.length > 1 && (
         <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
           {slides.map((_, i) => (
