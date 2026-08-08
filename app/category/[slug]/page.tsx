@@ -1,27 +1,26 @@
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { api, siteConfig } from "@/lib/api";
-import { CategoryChips } from "@/components/CategoryChips";
 import { ProductGrid } from "@/components/ProductGrid";
 import { SectionTitle } from "@/components/SectionTitle";
 
-const VALID_SLUGS = [
-  "mobiles",
-  "electronics",
-  "fashion",
-  "kitchen",
-  "beauty",
-  "gadgets",
-  "mens-wear",
-];
+type Props = {
+  params: Promise<{ slug: string }>;
+};
 
-type Props = { params: Promise<{ slug: string }> };
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: Props): Promise<Metadata> {
   const { slug } = await params;
-  const name = slug.charAt(0).toUpperCase() + slug.slice(1);
+
+  const name = slug
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+
   return {
     title: `${name} Deals`,
     description: `Best ${name.toLowerCase()} affiliate deals on ${siteConfig.name}. Amazon, Flipkart & more.`,
@@ -32,40 +31,57 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-
 export default async function CategoryPage({ params }: Props) {
   const { slug } = await params;
-  if (!VALID_SLUGS.includes(slug)) notFound();
 
-  let categories: Awaited<ReturnType<typeof api.getCategories>>["categories"] =
-    [];
+  let categories: Awaited<
+    ReturnType<typeof api.getCategories>
+  >["categories"] = [];
+
   let initialProducts: Awaited<
     ReturnType<typeof api.getProducts>
   >["products"] = [];
-  const categoryName = slug.charAt(0).toUpperCase() + slug.slice(1);
 
   try {
     const [catRes, prodRes] = await Promise.all([
       api.getCategories(),
-      api.getProducts({ category: slug, limit: 12 }),
+      api.getProducts({
+        category: slug,
+        limit: 12,
+      }),
     ]);
+
     categories = catRes.categories;
     initialProducts = prodRes.products;
+
+    // Check whether this category exists in the database
+    const categoryExists = categories.some(
+      (category) => category.slug === slug
+    );
+
+    if (!categoryExists) {
+      notFound();
+    }
   } catch {
-    /* handled by client */
+    // handled by client
   }
 
+  const categoryName = slug
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+
   return (
-    <div className="space-y-6">
-      <SectionTitle 
+    <>
+      <SectionTitle
         title={`${categoryName} Deals`}
         subtitle="Affiliate offers — redirects to partner stores"
       />
-      <CategoryChips categories={categories} />
+
       <ProductGrid
         initialProducts={initialProducts}
         query={{ category: slug }}
       />
-    </div>
+    </>
   );
 }
