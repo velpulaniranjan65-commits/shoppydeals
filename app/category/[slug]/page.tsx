@@ -14,6 +14,7 @@ const VALID_SLUGS = [
   "kitchen",
   "beauty",
   "gadgets",
+  "mens-wear",
 ];
 
 type Props = { params: Promise<{ slug: string }> };
