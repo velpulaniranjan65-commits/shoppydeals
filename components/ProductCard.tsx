@@ -39,16 +39,17 @@ async function handleViewDeal() {
           {product.discount}% OFF
         </span>
         <motion.div
-          className="relative h-full w-full"
+          className="relative aspect-[4/5] w-full overflow-hidden"
           whileHover={{ scale: 1.04 }}
           transition={{ type: "spring", stiffness: 300, damping: 22 }}
         >
           <Image
             src={getImageUrl(product.image) ||"/placeholder-product.svg"}
-            width={300}
-            height={300}
+            width={400}
+            height={500}
             alt="product"
             unoptimized
+            className="h-full w-full object-contain"
           />
         </motion.div>
       </div>
